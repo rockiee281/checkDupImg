@@ -17,7 +17,7 @@ def checkImage(url):
         try:
                 data = StringIO(urllib2.urlopen(url).read())
                 hash = imagehash.average_hash(Image.open(data))
-                print hash,url
+#                print hash,url
                 buffer.append((str(hash),url.strip()))
                 data.close()
         except urllib2.URLError, e:
@@ -43,13 +43,13 @@ def checkImg():
         jobs = [gevent.spawn(checkImage,imgUrl) for imgUrl in lines]
         gevent.joinall(jobs)
 
-def checkSimilar():
+def checkSimilar(differ = 5000):
     f = file('result')
-    outfile = file('output','w')
+    outfile = file('output.html','w')
+    outfile.write('<html><body>')
     delfile = file('toBeDel','w')
     lines = f.readlines()
     f.close()
-
     # if toBeDel.old exists, remove deleted images from result
     import os 
     if os.path.isfile('toBeDel.old'):
@@ -63,12 +63,16 @@ def checkSimilar():
     for line in lines:
         data = line.split(' ')
         hash = int(data[0],16)
-        print hash
-        if hash - lasthash < 500 :
+        if hash - lasthash < differ :
            similar.append(line.strip())
         else:
             if len(similar) > 1 :
-                outfile.write(",".join(similar) + '\n')
+                outfile.write('<div>')
+                for item in similar:
+                    imginfo = item.split(' ')
+                    outfile.write(imginfo[0])
+                    outfile.write('<img src="' + imginfo[1] + '" />')
+                outfile.write('</div>\n')
                 for item in similar[1:]:
                     delfile.write(item.split(' ')[1] + "\n")
                 similar = []
@@ -76,11 +80,18 @@ def checkSimilar():
             elif len(similar) == 1:
                 similar[0] = line.strip()
         lasthash = hash
+    outfile.write('</body></html>')
     outfile.close()
 
 if __name__ == '__main__':
     import os
+    import sys
+    args = sys.argv[1:]
+    
+    differ = 5000
+    if len(args) > 0:
+        differ = args[0]
     #if result has been caculated, donot process again
     if not os.path.isfile('result'): 
        checkImg()
-    checkSimilar()
+    checkSimilar(int(differ))
