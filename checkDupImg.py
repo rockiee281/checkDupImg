@@ -27,7 +27,7 @@ def checkImage(url):
         except:
             pass
 
-        #对buffer中的数据排序
+        #sort buffer ordered by phash
         sorted(buffer,key=lambda item:item[1])
         result = open('result','w',2048)
         for val in buffer:
