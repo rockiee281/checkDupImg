@@ -71,7 +71,7 @@ def checkSimilar(differ = 5000):
                 for item in similar:
                     imginfo = item.split(' ')
                     outfile.write(imginfo[0])
-                    outfile.write('<img src="' + imginfo[1] + '" />')
+                    outfile.write('<img style="width:500px;" src="' + imginfo[1] + '" />')
                 outfile.write('</div>\n')
                 for item in similar[1:]:
                     delfile.write(item.split(' ')[1] + "\n")
